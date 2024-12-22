@@ -32,7 +32,7 @@ jobs:
 
       - name: Create new version script
         run: |
-          echo "
+          echo \"\"\" 
 import json
 import requests
 from datetime import datetime
@@ -86,7 +86,7 @@ for app in data['apps']:
 # Write the updated data back to repo.json
 with open(repo_file_path, 'w') as f:
     json.dump(data, f, indent=2)
-          " > create_version.py
+          \"\"\" > create_version.py
 
       - name: Run the Python script
         run: |
