@@ -1,0 +1,28 @@
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: '* * * * *' # Runs every minute
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Git and Fetch Upstream
+      - name: Set up Git and Fetch Upstream
+        run: |
+          git remote add upstream https://github.com/dayanch96/YTLite.git
+          git fetch upstream
+
+      # Step 3: Merge upstream branch into the fork branch
+      - name: Merge Upstream Changes
+        run: |
+          git checkout main
+          git merge upstream/main
+          git push origin main
