@@ -1,110 +1,64 @@
 name: Update Version
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       version:
-        description: 'Enter the new version number'
+        description: 'The new version number'
         required: true
-        default: '5.1'
       version_description:
-        description: 'Enter the new version description'
+        description: 'The description of the new version'
         required: true
-        default: 'YouTube Plus version 5.1 brings enhanced features for a more enjoyable YouTube experience, including ad-blocking, background play, and additional customization options.'
-      download_url:
-        description: 'Enter the new download file URL'
+      download_file:
+        description: 'The URL of the download file'
         required: true
-        default: 'https://github.com/Taftle10/YTLite/releases/download/Release/YouTubePlus_5.1.ipa'
 
 jobs:
   update_version:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      # Get the current date and time for the versionDate
-      - name: Get current date and time
-        id: current_time
+      - name: Download the file
         run: |
-          VERSION_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          echo "VERSION_DATE=$VERSION_DATE" >> $GITHUB_ENV
+          curl -L ${{ github.event.inputs.download_file }} -o download_file.ipa
 
-      # Get the size of the download file
-      - name: Get download file size
+      - name: Calculate file size
         id: file_size
         run: |
-          # Get the download file URL from the input
-          DOWNLOAD_URL="${{ github.event.inputs.download_url }}"
-          
-          # Download the file and get its size
-          FILE_SIZE=$(curl -sI "$DOWNLOAD_URL" | grep -i "Content-Length" | awk '{print $2}' | tr -d '\r')
-          
-          echo "File size: $FILE_SIZE bytes"
-          echo "FILE_SIZE=$FILE_SIZE" >> $GITHUB_ENV
+          FILE_SIZE=$(stat -c %s download_file.ipa)
+          echo "File size: $FILE_SIZE"
+          echo "file_size=$FILE_SIZE" >> $GITHUB_ENV
 
-      # Add new version metadata to the JSON file without altering previous versions
-      - name: Add new version metadata
+      - name: Get current date and time
+        id: date
         run: |
-          # Path to the metadata file
-          VERSION_FILE="repo.json"
-          
-          # Set the new values
-          VERSION="${{ github.event.inputs.version }}"
-          VERSION_DATE="$VERSION_DATE"
-          VERSION_DESCRIPTION="${{ github.event.inputs.version_description }}"
-          DOWNLOAD_URL="${{ github.event.inputs.download_url }}"
-          ICON_URL="https://raw.githubusercontent.com/Taftle10/YTLite/refs/heads/main/logo.png"
-          SCREENSHOT_URLS='[
-            "https://github.com/Taftle10/YTLite/raw/main/Resources/scr1.jpg?raw=true",
-            "https://github.com/Taftle10/YTLite/raw/main/Resources/scr2.jpg?raw=true",
-            "https://github.com/Taftle10/YTLite/blob/main/Resources/scr3.jpg?raw=true"
-          ]'
-          SIZE=$FILE_SIZE
+          CURRENT_DATE=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
+          echo "Current date: $CURRENT_DATE"
+          echo "current_date=$CURRENT_DATE" >> $GITHUB_ENV
 
-          # Create a new version metadata entry
-          NEW_VERSION_ENTRY=$(jq -n \
-            --arg version "$VERSION" \
-            --arg versionDate "$VERSION_DATE" \
-            --arg versionDescription "$VERSION_DESCRIPTION" \
-            --arg downloadURL "$DOWNLOAD_URL" \
-            --arg iconURL "$ICON_URL" \
-            --arg screenshotURLs "$SCREENSHOT_URLS" \
-            --arg size "$SIZE" \
-            '{
-              name: "YouTube Plus",
-              bundleIdentifier: "com.YouTubePlus.YTPlus",
-              developerName: "YouTubePlus Team",
-              version: $version,
-              versionDate: $versionDate,
-              versionDescription: $versionDescription,
-              beta: false,
-              size: ($size | tonumber),
-              localizedDescription: "YouTube Plus (YTPlus) offers an improved version of the official YouTube app with additional features like ad-blocking, background playback, and more.",
-              iconURL: $iconURL,
-              tintColor: "FF0000",
-              downloadURL: $downloadURL,
-              screenshotURLs: ($screenshotURLs | fromjson)
-            }')
+      - name: Update repo.json with new version
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          VERSION_DESCRIPTION=${{ github.event.inputs.version_description }}
+          DOWNLOAD_URL=${{ github.event.inputs.download_file }}
+          FILE_SIZE=$FILE_SIZE
+          DATE=$current_date
 
-          # Add the new version entry to the versions array without changing the previous versions
-          jq --argjson newVersionEntry "$NEW_VERSION_ENTRY" \
-             '.versions += [$newVersionEntry]' \
-             $VERSION_FILE > updated_repo.json
+          jq ".apps[0].versions += [{
+            \"version\": \"$VERSION\",
+            \"date\": \"$DATE\",
+            \"localizedDescription\": \"$VERSION_DESCRIPTION\",
+            \"downloadURL\": \"$DOWNLOAD_URL\",
+            \"size\": $FILE_SIZE
+          }]" repo.json > temp.json && mv temp.json repo.json
 
-          # Rename the updated file back to the original
-          mv updated_repo.json $VERSION_FILE
-
-      # Commit and push changes back to the repository
       - name: Commit and push changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          author_name: "github-actions"
-          author_email: "github-actions@github.com"
-          message: "Add new version ${{ github.event.inputs.version }} metadata"
-          add: "repo.json"
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add repo.json
+          git commit -m "Add version ${{ github.event.inputs.version }}"
+          git push
