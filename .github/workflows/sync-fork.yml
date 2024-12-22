@@ -2,7 +2,7 @@ name: Sync Fork
 
 on:
   schedule:
-    - cron: '* * * * *' # Runs every minute
+    - cron: '0 0 * * 0' # Runs every minute
   workflow_dispatch: # Allows manual triggering
 
 jobs:
@@ -20,9 +20,13 @@ jobs:
           git remote add upstream https://github.com/dayanch96/YTLite.git
           git fetch upstream
 
-      # Step 3: Merge upstream branch into the fork branch
+      # Step 3: Check if the branch is up-to-date and merge if needed
       - name: Merge Upstream Changes
         run: |
           git checkout main
-          git merge upstream/main
-          git push origin main
+          if git merge --ff-only upstream/main; then
+            echo "Fork is up-to-date. No changes to sync."
+          else
+            echo "Merged changes from upstream."
+            git push origin main
+          fi
