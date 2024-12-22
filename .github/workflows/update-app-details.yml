@@ -52,12 +52,13 @@ jobs:
              --arg date "$DATE" \
              --arg version_description "$VERSION_DESCRIPTION" \
              --arg download_url "$DOWNLOAD_URL" \
+             --argjson size "$FILE_SIZE" \
              '.apps[0].versions += [{
                "version": $version,
                "date": $date,
                "localizedDescription": $version_description,
                "downloadURL": $download_url,
-               "size": $FILE_SIZE
+               "size": $size
              }]' repo.json > temp.json && mv temp.json repo.json
 
       - name: Commit and push changes
