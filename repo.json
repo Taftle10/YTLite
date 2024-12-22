@@ -1,0 +1,45 @@
+{
+  "name": "YTPlus Official",
+  "identifier": "com.ytplus.app",
+  "sourceURL": "https://apps.ytplus.io",
+  "apps": [
+    {
+      "name": "YouTube Plus",
+      "bundleIdentifier": "com.YouTubePlus.YTPlus",
+      "developerName": "YouTubePlus Team",
+      "version": "5.1",
+      "versionDate": "2024-12-22T00:00:00Z",
+      "versionDescription": "YouTube Plus version 5.1 brings enhanced features for a more enjoyable YouTube experience, including ad-blocking, background play, and additional customization options.",
+      "beta": false,
+      "size": 5100000,
+      "localizedDescription": "YouTube Plus (YTPlus) offers an improved version of the official YouTube app with additional features like ad-blocking, background playback, and more.",
+      "iconURL": "https://example.com/ytplus_icon.png",
+      "tintColor": "FF0000",
+      "downloadURL": "https://github.com/Taftle10/YTLite/releases/download/Release/YouTubePlus_5.1.ipa",
+      "screenshotURLs": [
+        "https://example.com/ytplus_screenshot1.png",
+        "https://example.com/ytplus_screenshot2.png",
+        "https://example.com/ytplus_screenshot3.png"
+      ],
+      "versions": [
+        {
+          "version": "5.1",
+          "date": "2024-12-22T00:00:00Z",
+          "localizedDescription": "YouTube Plus version 5.1 brings enhanced features for a more enjoyable YouTube experience, including ad-blocking, background play, and additional customization options.",
+          "downloadURL": "https://github.com/Taftle10/YTLite/releases/download/Release/YouTubePlus_5.1.ipa",
+          "size": 5100000
+        }
+      ],
+      "permissions": [
+        {
+          "type": "background-fetch",
+          "usageDescription": "Allows YouTube Plus to run in the background for uninterrupted playback."
+        },
+        {
+          "type": "background-audio",
+          "usageDescription": "Allows YouTube Plus to play audio in the background while using other apps."
+        }
+      ]
+    }
+  ]
+}
