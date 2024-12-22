@@ -2,7 +2,7 @@ name: Sync Fork
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # Runs every minute
+    - cron: '0 0 * * 0' # Runs once a week at midnight on Sunday
   workflow_dispatch: # Allows manual triggering
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
           git checkout main
           if git merge --ff-only upstream/main; then
             echo "Fork is up-to-date. No changes to sync."
+            echo "::warning ::Fork is already up-to-date. No changes to sync."
           else
             echo "Merged changes from upstream."
             git push origin main
-          fi
