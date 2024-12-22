@@ -22,12 +22,21 @@ jobs:
 
       # Step 3: Check if the branch is up-to-date and merge if needed
       - name: Merge Upstream Changes
+        id: merge
+        continue-on-error: true
         run: |
           git checkout main
-          merge_result=$(git merge --ff-only upstream/main || echo 'merge_failed')
-          if [ "$merge_result" = "merge_failed" ]; then
-            echo "Merged changes from upstream."
-            git push origin main
-          else
-            echo "::warning ::Fork is already up-to-date. No changes to sync."
-          fi
+          git merge --ff-only upstream/main
+          
+      # Step 4: Check if merge was needed
+      - name: Check merge result
+        if: steps.merge.outcome == 'failure'
+        run: |
+          echo "Fork is up-to-date. No changes to sync."
+          echo "::warning ::Fork is already up-to-date. No changes to sync."
+
+      - name: Push changes if merged
+        if: steps.merge.outcome != 'failure'
+        run: |
+          echo "Merged changes from upstream."
+          git push origin main
