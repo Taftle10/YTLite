@@ -1,70 +1,71 @@
-name: Update Version
+import requests
+from datetime import datetime
 
-on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'The new version number'
-        required: true
-      version_description:
-        description: 'The description of the new version'
-        required: true
-      download_file:
-        description: 'The URL of the download file'
-        required: true
+def get_ipa_size(download_url):
+    """Get the size of the IPA file from the provided download URL."""
+    try:
+        # Send a request to the URL and get the headers to fetch the content length
+        response = requests.head(download_url)
+        
+        # Check if the response is successful
+        if response.status_code == 200:
+            # Return the size of the file in bytes
+            return int(response.headers.get('Content-Length', 0))
+        else:
+            print(f"Error fetching IPA file size from {download_url}. Status code: {response.status_code}")
+            return 0
+    except requests.RequestException as e:
+        print(f"Error during request: {e}")
+        return 0
 
-jobs:
-  update_version:
-    runs-on: ubuntu-latest
+def make_new_version(version, description, download_url, app_data):
+    """Update app data with the new version information, setting the current date as version date."""
+    # Get the current date and time in ISO format
+    version_date = datetime.utcnow().isoformat() + "Z"
+    
+    # Get the size of the IPA file
+    ipa_size = get_ipa_size(download_url)
+    
+    # Update the app data with the new version details
+    app_data['version'] = version
+    app_data['versionDate'] = version_date
+    app_data['versionDescription'] = description
+    app_data['downloadURL'] = download_url
+    app_data['size'] = ipa_size  # Update the size of the IPA file
+    
+    # Optionally, update the localized description
+    app_data['localizedDescription'] = description
+    
+    return app_data
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+# Example app data (from your input)
+app_data = {
+    "name": "YouTube Plus",
+    "bundleIdentifier": "com.YouTubePlus.YTPlus",
+    "developerName": "YouTubePlus Team",
+    "version": "5.1",
+    "versionDate": "2024-12-22T00:00:00Z",
+    "versionDescription": "YouTube Plus version 5.1 brings enhanced features for a more enjoyable YouTube experience, including ad-blocking, background play, and additional customization options.",
+    "beta": False,
+    "size": 5100000,
+    "localizedDescription": "YouTube Plus (YTPlus) offers an improved version of the official YouTube app with additional features like ad-blocking, background playback, and more.",
+    "iconURL": "https://raw.githubusercontent.com/Taftle10/YTLite/refs/heads/main/logo.png",
+    "tintColor": "FF0000",
+    "downloadURL": "https://github.com/Taftle10/YTLite/releases/download/Release/YouTubePlus_5.1.ipa",
+    "screenshotURLs": [
+        "https://github.com/Taftle10/YTLite/raw/main/Resources/scr1.jpg?raw=true",
+        "https://github.com/Taftle10/YTLite/raw/main/Resources/scr2.jpg?raw=true",
+        "https://github.com/Taftle10/YTLite/blob/main/Resources/scr3.jpg?raw=true"
+    ],
+}
 
-      - name: Download the file
-        run: |
-          curl -L ${{ github.event.inputs.download_file }} -o download_file.ipa
+# Example to create a new version (5.2)
+new_version = "5.2"
+new_description = "YouTube Plus version 5.2 introduces new features, bug fixes, and performance improvements."
+new_download_url = "https://github.com/Taftle10/YTLite/releases/download/Release/YouTubePlus_5.2.ipa"
 
-      - name: Calculate file size
-        id: file_size
-        run: |
-          FILE_SIZE=$(stat -c %s download_file.ipa)
-          echo "File size: $FILE_SIZE"
-          echo "file_size=$FILE_SIZE" >> $GITHUB_ENV
+# Create a new version and update the app data
+updated_app_data = make_new_version(new_version, new_description, new_download_url, app_data)
 
-      - name: Get current date and time
-        id: date
-        run: |
-          CURRENT_DATE=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
-          echo "Current date: $CURRENT_DATE"
-          echo "current_date=$CURRENT_DATE" >> $GITHUB_ENV
-
-      - name: Update repo.json with new version
-        run: |
-          VERSION="${{ github.event.inputs.version }}"
-          VERSION_DESCRIPTION="${{ github.event.inputs.version_description }}"
-          DOWNLOAD_URL="${{ github.event.inputs.download_file }}"
-          FILE_SIZE=$FILE_SIZE
-          DATE=$current_date
-
-          # Use jq to append the new version to the repo.json file
-          jq --arg version "$VERSION" \
-             --arg date "$DATE" \
-             --arg version_description "$VERSION_DESCRIPTION" \
-             --arg download_url "$DOWNLOAD_URL" \
-             --argjson size "$FILE_SIZE" \
-             '.apps[0].versions += [{
-               "version": $version,
-               "date": $date,
-               "localizedDescription": $version_description,
-               "downloadURL": $download_url,
-               "size": $size
-             }]' repo.json > temp.json && mv temp.json repo.json
-
-      - name: Commit and push changes
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add repo.json
-          git commit -m "Add version ${{ github.event.inputs.version }}"
-          git push
+# Output the updated app data
+print(updated_app_data)
