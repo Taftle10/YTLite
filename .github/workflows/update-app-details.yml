@@ -5,6 +5,19 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Enter the new version number'
+        required: true
+        default: '5.1'
+      version_description:
+        description: 'Enter the new version description'
+        required: true
+        default: 'YouTube Plus version 5.1 brings enhanced features for a more enjoyable YouTube experience, including ad-blocking, background play, and additional customization options.'
+      download_url:
+        description: 'Enter the new download file URL'
+        required: true
+        default: 'https://github.com/Taftle10/YTLite/releases/download/Release/YouTubePlus_5.1.ipa'
 
 jobs:
   update_version:
@@ -15,12 +28,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Get the current date and time for the versionDate
+      - name: Get current date and time
+        id: current_time
+        run: |
+          VERSION_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "VERSION_DATE=$VERSION_DATE" >> $GITHUB_ENV
+
       # Get the size of the download file
       - name: Get download file size
         id: file_size
         run: |
-          # Get the download file URL from the JSON file or input
-          DOWNLOAD_URL="https://github.com/Taftle10/YTLite/releases/download/Release/YouTubePlus_5.1.ipa"
+          # Get the download file URL from the input
+          DOWNLOAD_URL="${{ github.event.inputs.download_url }}"
           
           # Download the file and get its size
           FILE_SIZE=$(curl -sI "$DOWNLOAD_URL" | grep -i "Content-Length" | awk '{print $2}' | tr -d '\r')
@@ -28,17 +48,17 @@ jobs:
           echo "File size: $FILE_SIZE bytes"
           echo "FILE_SIZE=$FILE_SIZE" >> $GITHUB_ENV
 
-      # Update version metadata with the new file size
-      - name: Update version metadata
+      # Add new version metadata to the JSON file
+      - name: Add new version metadata
         run: |
           # Path to the metadata file
           VERSION_FILE="repo.json"
           
           # Set the new values
-          VERSION="5.1"
-          VERSION_DATE="2024-12-22T00:00:00Z"
-          VERSION_DESCRIPTION="YouTube Plus version 5.1 brings enhanced features for a more enjoyable YouTube experience, including ad-blocking, background play, and additional customization options."
-          DOWNLOAD_URL="https://github.com/Taftle10/YTLite/releases/download/Release/YouTubePlus_5.1.ipa"
+          VERSION="${{ github.event.inputs.version }}"
+          VERSION_DATE="$VERSION_DATE"
+          VERSION_DESCRIPTION="${{ github.event.inputs.version_description }}"
+          DOWNLOAD_URL="${{ github.event.inputs.download_url }}"
           ICON_URL="https://raw.githubusercontent.com/Taftle10/YTLite/refs/heads/main/logo.png"
           SCREENSHOT_URLS='[
             "https://github.com/Taftle10/YTLite/raw/main/Resources/scr1.jpg?raw=true",
@@ -47,27 +67,34 @@ jobs:
           ]'
           SIZE=$FILE_SIZE
 
-          # Use jq with proper quoting for variables
-          jq --arg version "$VERSION" \
-             --arg versionDate "$VERSION_DATE" \
-             --arg versionDescription "$VERSION_DESCRIPTION" \
-             --arg downloadURL "$DOWNLOAD_URL" \
-             --arg iconURL "$ICON_URL" \
-             --arg screenshotURLs "$SCREENSHOT_URLS" \
-             --arg size "$SIZE" \
-             '.name = "YouTube Plus" |
-                .bundleIdentifier = "com.YouTubePlus.YTPlus" |
-                .developerName = "YouTubePlus Team" |
-                .version = $version |
-                .versionDate = $versionDate |
-                .versionDescription = $versionDescription |
-                .beta = false |
-                .size = ($size | tonumber) |
-                .localizedDescription = "YouTube Plus (YTPlus) offers an improved version of the official YouTube app with additional features like ad-blocking, background playback, and more." |
-                .iconURL = $iconURL |
-                .tintColor = "FF0000" |
-                .downloadURL = $downloadURL |
-                .screenshotURLs = ($screenshotURLs | fromjson)' \
+          # Create a new version metadata entry
+          NEW_VERSION_ENTRY=$(jq -n \
+            --arg version "$VERSION" \
+            --arg versionDate "$VERSION_DATE" \
+            --arg versionDescription "$VERSION_DESCRIPTION" \
+            --arg downloadURL "$DOWNLOAD_URL" \
+            --arg iconURL "$ICON_URL" \
+            --arg screenshotURLs "$SCREENSHOT_URLS" \
+            --arg size "$SIZE" \
+            '{
+              name: "YouTube Plus",
+              bundleIdentifier: "com.YouTubePlus.YTPlus",
+              developerName: "YouTubePlus Team",
+              version: $version,
+              versionDate: $versionDate,
+              versionDescription: $versionDescription,
+              beta: false,
+              size: ($size | tonumber),
+              localizedDescription: "YouTube Plus (YTPlus) offers an improved version of the official YouTube app with additional features like ad-blocking, background playback, and more.",
+              iconURL: $iconURL,
+              tintColor: "FF0000",
+              downloadURL: $downloadURL,
+              screenshotURLs: ($screenshotURLs | fromjson)
+            }')
+
+          # Add the new version entry to the existing JSON file
+          jq --argjson newVersionEntry "$NEW_VERSION_ENTRY" \
+             '.versions += [$newVersionEntry]' \
              $VERSION_FILE > updated_repo.json
 
           # Rename the updated file back to the original
@@ -79,5 +106,5 @@ jobs:
         with:
           author_name: "github-actions"
           author_email: "github-actions@github.com"
-          message: "Update version 5.1 metadata with new download file size and URL"
+          message: "Add new version ${{ github.event.inputs.version }} metadata"
           add: "repo.json"
