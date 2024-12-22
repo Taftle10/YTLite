@@ -11,20 +11,16 @@ on:
         description: 'Version of the new release'
         required: false
         type: string
+      releaseDate:
+        description: 'Date of the new release'
+        required: false
+        type: string
       releaseDescription:
         description: 'Description of the new release'
         required: false
         type: string
       releaseDownloadLink:
         description: 'Download link for the new release'
-        required: false
-        type: string
-      changeDownloadLink:
-        description: 'Change the download link for the IPA'
-        required: false
-        type: boolean
-      newDownloadLink:
-        description: 'New download link for the IPA'
         required: false
         type: string
 
@@ -37,7 +33,7 @@ jobs:
 
       - name: Update JSON file
         run: |
-          # Path to the JSON file (changed to repo.json)
+          # Path to the JSON file
           FILE_PATH="repo.json"
           
           # Read the current JSON data
@@ -45,16 +41,20 @@ jobs:
 
           # Add Release
           if [ "${{ github.event.inputs.addRelease }}" = "true" ]; then
+            # Format the date properly
+            formatted_date=$(date -d "${{ github.event.inputs.releaseDate }}" --utc +"%Y-%m-%dT%H:%M:%SZ")
+
+            # Add the release data to the JSON structure
             JSON=$(echo "$JSON" | jq --arg version "${{ github.event.inputs.releaseVersion }}" \
+                                      --arg date "$formatted_date" \
                                       --arg description "${{ github.event.inputs.releaseDescription }}" \
                                       --arg downloadLink "${{ github.event.inputs.releaseDownloadLink }}" \
-                                      '.versions += [{"version": $version, "description": $description, "downloadLink": $downloadLink}]')
-          fi
-
-          # Change Download Link
-          if [ "${{ github.event.inputs.changeDownloadLink }}" = "true" ]; then
-            JSON=$(echo "$JSON" | jq --arg newDownloadLink "${{ github.event.inputs.newDownloadLink }}" \
-                                      '.downloadLink = $newDownloadLink')
+                                      '.apps[0].versions += [{
+                                        "version": $version,
+                                        "date": $date,
+                                        "localizedDescription": $description,
+                                        "downloadURL": $downloadLink
+                                      }]')
           fi
 
           # Save the updated JSON back to the file
