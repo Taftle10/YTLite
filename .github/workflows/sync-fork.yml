@@ -29,6 +29,5 @@ jobs:
             echo "Merged changes from upstream."
             git push origin main
           else
-            echo "Fork is up-to-date. No changes to sync."
             echo "::warning ::Fork is already up-to-date. No changes to sync."
           fi
