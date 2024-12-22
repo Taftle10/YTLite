@@ -47,20 +47,28 @@ jobs:
           ]'
           SIZE=$FILE_SIZE
 
-          # Create a new version metadata JSON object
-          jq '.name = "YouTube Plus" |
-              .bundleIdentifier = "com.YouTubePlus.YTPlus" |
-              .developerName = "YouTubePlus Team" |
-              .version = "'$VERSION'" |
-              .versionDate = "'$VERSION_DATE'" |
-              .versionDescription = "'$VERSION_DESCRIPTION'" |
-              .beta = false |
-              .size = '$SIZE' |
-              .localizedDescription = "YouTube Plus (YTPlus) offers an improved version of the official YouTube app with additional features like ad-blocking, background playback, and more." |
-              .iconURL = "'$ICON_URL'" |
-              .tintColor = "FF0000" |
-              .downloadURL = "'$DOWNLOAD_URL'" |
-              .screenshotURLs = '$SCREENSHOT_URLS' ' $VERSION_FILE > updated_repo.json
+          # Use jq with proper quoting for variables
+          jq --arg version "$VERSION" \
+             --arg versionDate "$VERSION_DATE" \
+             --arg versionDescription "$VERSION_DESCRIPTION" \
+             --arg downloadURL "$DOWNLOAD_URL" \
+             --arg iconURL "$ICON_URL" \
+             --arg screenshotURLs "$SCREENSHOT_URLS" \
+             --arg size "$SIZE" \
+             '.name = "YouTube Plus" |
+                .bundleIdentifier = "com.YouTubePlus.YTPlus" |
+                .developerName = "YouTubePlus Team" |
+                .version = $version |
+                .versionDate = $versionDate |
+                .versionDescription = $versionDescription |
+                .beta = false |
+                .size = ($size | tonumber) |
+                .localizedDescription = "YouTube Plus (YTPlus) offers an improved version of the official YouTube app with additional features like ad-blocking, background playback, and more." |
+                .iconURL = $iconURL |
+                .tintColor = "FF0000" |
+                .downloadURL = $downloadURL |
+                .screenshotURLs = ($screenshotURLs | fromjson)' \
+             $VERSION_FILE > updated_repo.json
 
           # Rename the updated file back to the original
           mv updated_repo.json $VERSION_FILE
