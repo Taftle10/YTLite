@@ -57,5 +57,26 @@
     "https://github.com/Taftle10/YTLite/raw/main/Resources/scr1.jpg?raw=true",
     "https://github.com/Taftle10/YTLite/raw/main/Resources/scr2.jpg?raw=true",
     "https://github.com/Taftle10/YTLite/blob/main/Resources/scr3.jpg?raw=true"
+  ],
+  "versions": [
+    {
+      "name": "YouTube Plus",
+      "bundleIdentifier": "com.YouTubePlus.YTPlus",
+      "developerName": "YouTubePlus Team",
+      "version": "5.1",
+      "versionDate": "2024-12-22T18:57:31Z",
+      "versionDescription": "Test",
+      "beta": false,
+      "size": 0,
+      "localizedDescription": "YouTube Plus (YTPlus) offers an improved version of the official YouTube app with additional features like ad-blocking, background playback, and more.",
+      "iconURL": "https://raw.githubusercontent.com/Taftle10/YTLite/refs/heads/main/logo.png",
+      "tintColor": "FF0000",
+      "downloadURL": "https://github.com/Taftle10/YTLite/releases/download/Release/YouTubePlus_5.1.ipa",
+      "screenshotURLs": [
+        "https://github.com/Taftle10/YTLite/raw/main/Resources/scr1.jpg?raw=true",
+        "https://github.com/Taftle10/YTLite/raw/main/Resources/scr2.jpg?raw=true",
+        "https://github.com/Taftle10/YTLite/blob/main/Resources/scr3.jpg?raw=true"
+      ]
+    }
   ]
 }
