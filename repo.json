@@ -1,7 +1,7 @@
 {
   "name": "YTPlus Official",
   "identifier": "com.ytplus.app",
-  "sourceURL": "https://apps.ytplus.io",
+  "sourceURL": "https://raw.githubusercontent.com/Taftle10/YTLite/refs/heads/main/repo.json",
   "apps": [
     {
       "name": "YouTube Plus",
