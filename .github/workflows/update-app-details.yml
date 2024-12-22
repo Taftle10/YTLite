@@ -3,22 +3,6 @@ name: Update App Details
 on:
   workflow_dispatch:
     inputs:
-      addNewsArticle:
-        description: 'Add a new news article'
-        required: false
-        type: boolean
-      newsTitle:
-        description: 'Title of the news article'
-        required: false
-        type: string
-      newsContent:
-        description: 'Content of the news article'
-        required: false
-        type: string
-      newsReleaseDate:
-        description: 'Release date of the news article (optional, in YYYY-MM-DD format)'
-        required: false
-        type: string
       addRelease:
         description: 'Add a new app release'
         required: false
@@ -58,14 +42,6 @@ jobs:
           
           # Read the current JSON data
           JSON=$(cat $FILE_PATH)
-
-          # Add News Article
-          if [ "${{ github.event.inputs.addNewsArticle }}" = "true" ]; then
-            JSON=$(echo "$JSON" | jq --arg title "${{ github.event.inputs.newsTitle }}" \
-                                      --arg content "${{ github.event.inputs.newsContent }}" \
-                                      --arg releaseDate "${{ github.event.inputs.newsReleaseDate }}" \
-                                      '.news += [{"title": $title, "content": $content, "releaseDate": $releaseDate}]')
-          fi
 
           # Add Release
           if [ "${{ github.event.inputs.addRelease }}" = "true" ]; then
