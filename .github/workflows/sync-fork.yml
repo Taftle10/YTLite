@@ -2,12 +2,12 @@ name: Sync Fork
 
 on:
   schedule:
-    - cron: '* * * * *' # Runs every minute
+    - cron: '0 0 * * 0' # Runs every minute
   workflow_dispatch: # Allows manual triggering
 
 jobs:
   sync:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       # Step 1: Checkout the repository
