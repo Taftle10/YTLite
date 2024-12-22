@@ -47,13 +47,19 @@ jobs:
           FILE_SIZE=$FILE_SIZE
           DATE=$current_date
 
-          jq ".apps[0].versions += [{
-            \"version\": \"$VERSION\",
-            \"date\": \"$DATE\",
-            \"localizedDescription\": \"$VERSION_DESCRIPTION\",
-            \"downloadURL\": \"$DOWNLOAD_URL\",
-            \"size\": $FILE_SIZE
-          }]" repo.json > temp.json && mv temp.json repo.json
+          # Use jq to append the new version to the repo.json file
+          jq --arg version "$VERSION" \
+             --arg date "$DATE" \
+             --arg version_description "$VERSION_DESCRIPTION" \
+             --arg download_url "$DOWNLOAD_URL" \
+             --argjson size "$FILE_SIZE" \
+             '.apps[0].versions += [{
+               "version": $version,
+               "date": $date,
+               "localizedDescription": $version_description,
+               "downloadURL": $download_url,
+               "size": $size
+             }]' repo.json > temp.json && mv temp.json repo.json
 
       - name: Commit and push changes
         run: |
