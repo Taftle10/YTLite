@@ -3,68 +3,44 @@ name: Update App Details
 on:
   workflow_dispatch:
     inputs:
-      changeLogo:
-        description: 'Change Logo'
-        required: false
-        type: boolean
-      newLogo:
-        description: 'New Logo URL'
-        required: false
-        type: string
-      changeImages:
-        description: 'Change Images'
-        required: false
-        type: boolean
-      newImage1:
-        description: 'New Image URL 1'
-        required: false
-        type: string
-      newImage2:
-        description: 'New Image URL 2'
-        required: false
-        type: string
-      newImage3:
-        description: 'New Image URL 3'
-        required: false
-        type: string
       addNewsArticle:
-        description: 'Add News Article'
+        description: 'Add a new news article'
         required: false
         type: boolean
-      newNewsTitle:
-        description: 'New News Title'
+      newsTitle:
+        description: 'Title of the news article'
         required: false
         type: string
-      newNewsContent:
-        description: 'New News Content'
+      newsContent:
+        description: 'Content of the news article'
         required: false
         type: string
-      deleteNewsArticle:
-        description: 'Delete News Article by Title'
+      newsReleaseDate:
+        description: 'Release date of the news article (optional, in YYYY-MM-DD format)'
+        required: false
+        type: string
+      addRelease:
+        description: 'Add a new app release'
+        required: false
+        type: boolean
+      releaseVersion:
+        description: 'Version of the new release'
+        required: false
+        type: string
+      releaseDescription:
+        description: 'Description of the new release'
+        required: false
+        type: string
+      releaseDownloadLink:
+        description: 'Download link for the new release'
         required: false
         type: string
       changeDownloadLink:
-        description: 'Change Download Link'
+        description: 'Change the download link for the IPA'
         required: false
         type: boolean
       newDownloadLink:
-        description: 'New Download Link'
-        required: false
-        type: string
-      addNewVersion:
-        description: 'Add New Version'
-        required: false
-        type: boolean
-      newVersion:
-        description: 'New Version Number'
-        required: false
-        type: string
-      newVersionDescription:
-        description: 'New Version Description'
-        required: false
-        type: string
-      newVersionDownloadLink:
-        description: 'New Version Download Link'
+        description: 'New download link for the IPA'
         required: false
         type: string
 
@@ -77,53 +53,35 @@ jobs:
 
       - name: Update JSON file
         run: |
-          # Load the existing JSON file
+          # Path to the JSON file
           FILE_PATH="app-details.json"
+
+          # Read the current JSON data
           JSON=$(cat $FILE_PATH)
-
-          # Update Logo
-          if [ "${{ github.event.inputs.changeLogo }}" = "true" ]; then
-            JSON=$(echo "$JSON" | jq --arg logo "${{ github.event.inputs.newLogo }}" '.logo = $logo')
-          fi
-
-          # Update Images
-          if [ "${{ github.event.inputs.changeImages }}" = "true" ]; then
-            JSON=$(echo "$JSON" | jq --arg img1 "${{ github.event.inputs.newImage1 }}" \
-                                      --arg img2 "${{ github.event.inputs.newImage2 }}" \
-                                      --arg img3 "${{ github.event.inputs.newImage3 }}" \
-                                      '.images = [$img1, $img2, $img3]')
-          fi
 
           # Add News Article
           if [ "${{ github.event.inputs.addNewsArticle }}" = "true" ]; then
-            JSON=$(echo "$JSON" | jq --arg title "${{ github.event.inputs.newNewsTitle }}" \
-                                      --arg content "${{ github.event.inputs.newNewsContent }}" \
-                                      '.news += [{"title": $title, "content": $content}]')
+            JSON=$(echo "$JSON" | jq --arg title "${{ github.event.inputs.newsTitle }}" \
+                                      --arg content "${{ github.event.inputs.newsContent }}" \
+                                      --arg releaseDate "${{ github.event.inputs.newsReleaseDate }}" \
+                                      '.news += [{"title": $title, "content": $content, "releaseDate": $releaseDate}]')
           fi
 
-          # Delete News Article
-          if [ -n "${{ github.event.inputs.deleteNewsArticle }}" ]; then
-            JSON=$(echo "$JSON" | jq --arg title "${{ github.event.inputs.deleteNewsArticle }}" \
-                                      'del(.news[] | select(.title == $title))')
+          # Add Release
+          if [ "${{ github.event.inputs.addRelease }}" = "true" ]; then
+            JSON=$(echo "$JSON" | jq --arg version "${{ github.event.inputs.releaseVersion }}" \
+                                      --arg description "${{ github.event.inputs.releaseDescription }}" \
+                                      --arg downloadLink "${{ github.event.inputs.releaseDownloadLink }}" \
+                                      '.versions += [{"version": $version, "description": $description, "downloadLink": $downloadLink}]')
           fi
-
-          # Sort News Articles by Name and Release Date
-          JSON=$(echo "$JSON" | jq '.news = (.news | sort_by(.title) | sort_by(.releaseDate))')
 
           # Change Download Link
           if [ "${{ github.event.inputs.changeDownloadLink }}" = "true" ]; then
-            JSON=$(echo "$JSON" | jq --arg downloadLink "${{ github.event.inputs.newDownloadLink }}" '.downloadLink = $downloadLink')
+            JSON=$(echo "$JSON" | jq --arg newDownloadLink "${{ github.event.inputs.newDownloadLink }}" \
+                                      '.downloadLink = $newDownloadLink')
           fi
 
-          # Add New Version
-          if [ "${{ github.event.inputs.addNewVersion }}" = "true" ]; then
-            JSON=$(echo "$JSON" | jq --arg version "${{ github.event.inputs.newVersion }}" \
-                                      --arg description "${{ github.event.inputs.newVersionDescription }}" \
-                                      --arg versionDownloadLink "${{ github.event.inputs.newVersionDownloadLink }}" \
-                                      '.versions += [{"version": $version, "description": $description, "downloadLink": $versionDownloadLink}]')
-          fi
-
-          # Save the updated JSON
+          # Save the updated JSON back to the file
           echo "$JSON" > $FILE_PATH
 
       - name: Commit updated JSON
