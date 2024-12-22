@@ -18,21 +18,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout the repository
-      uses: actions/checkout@v2
+      - name: Checkout the repository
+        uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.8'
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
 
-    - name: Install dependencies
-      run: |
-        pip install requests
+      - name: Install dependencies
+        run: |
+          pip install requests
 
-    - name: Create new version script
-      run: |
-        echo "
+      - name: Create new version script
+        run: |
+          echo "
 import json
 import requests
 from datetime import datetime
@@ -86,16 +86,16 @@ for app in data['apps']:
 # Write the updated data back to repo.json
 with open(repo_file_path, 'w') as f:
     json.dump(data, f, indent=2)
-        " > create_version.py
+          " > create_version.py
 
-    - name: Run the Python script
-      run: |
-        python create_version.py
+      - name: Run the Python script
+        run: |
+          python create_version.py
 
-    - name: Commit changes
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add repo.json
-        git commit -m "Add new version ${{ github.event.inputs.version }}"
-        git push
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add repo.json
+          git commit -m "Add new version ${{ github.event.inputs.version }}"
+          git push
