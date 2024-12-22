@@ -24,9 +24,11 @@ jobs:
       - name: Merge Upstream Changes
         run: |
           git checkout main
-          if git merge --ff-only upstream/main; then
-            echo "Fork is up-to-date. No changes to sync."
-            echo "::warning ::Fork is already up-to-date. No changes to sync."
-          else
+          merge_result=$(git merge --ff-only upstream/main || echo 'merge_failed')
+          if [ "$merge_result" = "merge_failed" ]; then
             echo "Merged changes from upstream."
             git push origin main
+          else
+            echo "Fork is up-to-date. No changes to sync."
+            echo "::warning ::Fork is already up-to-date. No changes to sync."
+          fi
