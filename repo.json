@@ -48,5 +48,12 @@
       "caption": "I have recently released the 5.1 release. This app is built from the github page of dayanch96.",
       "date": "2024-12-22"
     }
+  ],
+  "versions": [
+    {
+      "version": "5.1",
+      "description": "Version 5.1 is the first version built by me.",
+      "downloadLink": "https://github.com/Taftle10/YTLite/releases/download/Release"
+    }
   ]
 }
