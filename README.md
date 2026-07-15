@@ -10,7 +10,6 @@ A flexible enhancer for YouTube on iOS, featuring over hundred customizable opti
 - [How to build a YouTube Plus app using GitHub Actions](#how-to-build-a-youtube-plus-app-using-github-actions)
 - [Supported YouTube Version](#supported-youtube-version)
 - [Tweak Integration Details](#tweak-integration-details)
-- [FAQ (Frequently Asked Questions)](#faq-frequently-asked-questions)
 
 ## Screenshots
 <table>
@@ -53,9 +52,15 @@ A flexible enhancer for YouTube on iOS, featuring over hundred customizable opti
 **All contributors are listed in the Contributors section**
 **Used open-source libraries are listed in the Open Source Libraries section**
 
+> [!NOTE]
+> Starting from version 5.2, YTPlus requires a subscription.  
+> The last free version is [5.2b4](https://github.com/dayanch96/YTLite/releases/tag/v5.2b4).
+
 ## FAQ
 - [🇺🇸 English FAQ](FAQs/FAQ_EN.md)
 - [🇷🇺 ЧаВо на Русском](FAQs/FAQ_RU.md)
+- [🇮🇹 FAQ in Italiano](FAQs/FAQ_IT.md)
+- [🇵🇱 FAQ po polsku](FAQs/FAQ_PL.md)
 
 ## Reviews
 Review by [@qbap](https://github.com/qbap) on ONE Jailbreak: https://onejailbreak.com/blog/youtube-plus/
@@ -71,7 +76,7 @@ Review by [@qbap](https://github.com/qbap) on ONE Jailbreak: https://onejailbrea
   <summary>How to build the YouTube Plus app</summary>
   <ol>
     <li>Click on <strong>Sync fork</strong>, and if your branch is out-of-date, click on <strong>Update branch</strong>.</li>
-    <li>Navigate to the <strong>Actions tab</strong> in your forked repository and select <strong>Build YouTube Plus app</strong>.</li>
+    <li>Navigate to the <strong>Actions tab</strong> in your forked repository and select <strong>Create YouTube Plus app</strong>.</li>
     <li>Click the <strong>Run workflow</strong> button located on the right side.</li>
     <li>Mark or unmark the tweaks you want to integrate. Learn more about them in the <a href="#tweak-integration-details">Tweak Integration Details</a> section.</li>
     <li>Prepare a decrypted .ipa file <em>(we cannot provide this due to legal reasons)</em>, then upload it to a file provider (e.g., filebin.net, filemail.com, or Dropbox is recommended). Paste the URL of the decrypted IPA file in the provided field.</li>
@@ -103,9 +108,9 @@ Review by [@qbap](https://github.com/qbap) on ONE Jailbreak: https://onejailbrea
 
 ## Supported YouTube Version
 <ul>
-   <li><strong>Latest confirmed:</strong> <em>20.29.3</em></li>
-   <li><strong>Date tested:</strong> <em>July 25, 2025</em></li>
-   <li><strong>YouTube Plus:</strong> <em>5.2 beta 2</em></li>
+   <li><strong>Latest confirmed:</strong> <em>21.16.2</em></li>
+   <li><strong>Date tested:</strong> <em>Apr 23, 2026</em></li>
+   <li><strong>YouTube Plus:</strong> <em>5.2.1</em></li>
 </ul>
 
 ## Tweak Integration Details
